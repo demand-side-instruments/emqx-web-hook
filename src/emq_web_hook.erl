@@ -180,7 +180,8 @@ on_message_publish(Message = #mqtt_message{topic = Topic}, {Filter}) ->
                   {topic, Message#mqtt_message.topic},
                   {qos, Message#mqtt_message.qos},
                   {retain, Message#mqtt_message.retain},
-                  {payload, Message#mqtt_message.payload},
+                  {payload, format_payload(Message#mqtt_message.payload)},
+                  {hash, format_hash(Message#mqtt_message.payload)},
                   {ts, emqttd_time:now_secs(Message#mqtt_message.timestamp)}],
         send_http_request(Params),
         {ok, Message}
@@ -201,7 +202,7 @@ on_message_delivered(ClientId, Username, Message = #mqtt_message{topic = Topic},
                   {topic, Message#mqtt_message.topic},
                   {qos, Message#mqtt_message.qos},
                   {retain, Message#mqtt_message.retain},
-                  {payload, Message#mqtt_message.payload},
+                  {payload, format_payload(Message#mqtt_message.payload)},
                   {ts, emqttd_time:now_secs(Message#mqtt_message.timestamp)}],
         send_http_request(Params)
     end, Topic, Filter).
@@ -221,7 +222,7 @@ on_message_acked(ClientId, Username, Message = #mqtt_message{topic = Topic}, {Fi
                   {topic, Message#mqtt_message.topic},
                   {qos, Message#mqtt_message.qos},
                   {retain, Message#mqtt_message.retain},
-                  {payload, Message#mqtt_message.payload},
+                  {payload, format_payload(Message#mqtt_message.payload)},
                   {ts, emqttd_time:now_secs(Message#mqtt_message.timestamp)}],
         send_http_request(Params)
     end, Topic, Filter).
@@ -282,7 +283,13 @@ format_from(From) when is_atom(From) ->
     {a2b(From), a2b(From)};
 format_from(_) ->
     {<<>>, <<>>}.
-
+format_payload(Payload) when is_binary(Payload) ->
+  binary_to_list(Payload);
+format_payload(Payload) -> binary_to_atom(Payload).
+format_hash(Payload) when is_binary(Payload) ->
+  <<X:256/big-unsigned-integer>> = crypto:hash(sha256,Payload),
+  % The trick to this expression is the io_lib:format format string for integers. Each format term is introduced through a tilde. There are three (mostly optional) fields: width, precision and pad, followed by the conversion character. "B" means "uppercase integer of given base," and "b" means "lowercase integer of given base." The width in this case is 64 characters, the precision is 16, which is interpreted as base for this conversion, and the padding character is 0. If it didn't pad by 0, then single-digit values would be default padded to 2 width by a space, which is not what we want.
+  lists:flatten(io_lib:format("~64.16.0b", [X])).
 a2b(A) -> erlang:atom_to_binary(A, utf8).
 
 load_(Hook, Fun, Filter, Params) ->
