@@ -286,7 +286,7 @@ format_from(_) ->
 format_payload(Payload) when is_binary(Payload) ->
   case catch mochijson2:encode(Payload) of
     % return hash if payload can't be converted into json (binary for exemple)
-    {'EXIT', _} -> lists:flatten(io_lib:format("~64.16.0b", [payload]));
+    {'EXIT', _} -> lists:flatten(io_lib:format("~w", [payload]));
     Result -> Result
   end.
 format_hash(Payload) when is_binary(Payload) ->
