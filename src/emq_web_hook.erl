@@ -288,11 +288,11 @@ format_payload(Payload) when is_binary(Payload) ->
     % return hash if payload can't be converted into json (binary for exemple)
     {'EXIT', _} ->
       null,
-      logger:info("tesing: Is binary :", is_binary(Payload)),
-      logger:info("tesing: Is list", is_list(Payload)),
-      logger:info("tesing: Is atom", is_atom(Payload)),
-      logger:info("tesing: Is bitstring", is_bitstring(Payload)),
-      logger:info("could not encode to json", Payload),
+      %logger:info("tesing: Is binary :", is_binary(Payload)),
+      %logger:info("tesing: Is list", is_list(Payload)),
+      %logger:info("tesing: Is atom", is_atom(Payload)),
+      %logger:info("tesing: Is bitstring", is_bitstring(Payload)),
+      %logger:info("could not encode to json", Payload),
       case catch crypto:hash(sha256,[Payload]) of
         {'EXIT', _} -> logger:info("failed to hash payload");
         _ -> logger:info("hash succeded")
@@ -308,7 +308,7 @@ format_payload(Payload) when is_binary(Payload) ->
     Result -> Result
   end.
 format_hash(Payload) when is_binary(Payload) ->
-  logger:info("in hash function", Payload),
+  %logger:info("in hash function", [Payload]),
   <<X:256/big-unsigned-integer>> = crypto:hash(sha256,[Payload]),
   % The trick to this expression is the io_lib:format format string for integers. Each format term is introduced through a tilde. There are three (mostly optional) fields: width, precision and pad, followed by the conversion character. "B" means "uppercase integer of given base," and "b" means "lowercase integer of given base." The width in this case is 64 characters, the precision is 16, which is interpreted as base for this conversion, and the padding character is 0. If it didn't pad by 0, then single-digit values would be default padded to 2 width by a space, which is not what we want.
   lists:flatten(io_lib:format("~64.16.0b", [X])).
