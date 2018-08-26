@@ -288,11 +288,11 @@ format_payload(Payload) when is_binary(Payload) ->
     % return hash if payload can't be converted into json (binary for exemple)
     {'EXIT', _} ->
       null,
-      logger:info("could not encode to json", Payload),
       logger:info("tesing: Is binary :", is_binary(Payload)),
       logger:info("tesing: Is list", is_list(Payload)),
       logger:info("tesing: Is atom", is_atom(Payload)),
       logger:info("tesing: Is bitstring", is_bitstring(Payload)),
+      logger:info("could not encode to json", Payload),
       case catch crypto:hash(sha256,[Payload]) of
         {'EXIT', _} -> logger:info("failed to hash payload");
         _ -> logger:info("hash succeded")
