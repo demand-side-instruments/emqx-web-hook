@@ -289,21 +289,21 @@ format_payload(Payload) when is_binary(Payload) ->
     {'EXIT', _} ->
       null,
       case catch crypto:hash(sha256,[Payload]) of
-        {'EXIT', _} -> ?LOG(debug, "failed to hash payload");
-        _ -> ?LOG(debug, "hash succeded")
+        {'EXIT', _} -> ?LOG(debug, "failed to hash payload", []);
+        _ -> ?LOG(debug, "hash succeded", [])
       end,
       case catch crypto:hash(sha256,Payload) of
-        {'EXIT', _} -> logger:info("failed to hash2 payload");
-        _ -> ?LOG(debug, "hash2 succeded")
+        {'EXIT', _} -> ?LOG(debug, "failed to hash2 payload", []);
+        _ -> ?LOG(debug, "hash2 succeded", [])
       end,
-      ?LOG(debug, "tesing: Is binary :", is_binary(Payload)),
-      ?LOG(debug, "tesing: Is list", is_list(Payload)),
-      ?LOG(debug, "tesing: Is atom", is_atom(Payload)),
-      ?LOG(debug, "tesing: Is bitstring", is_bitstring(Payload)),
-      ?LOG(debug, "could not encode to json", Payload),
+      ?LOG(debug, "tesing: Is binary :~p", [is_binary(Payload)]),
+      ?LOG(debug, "tesing: Is list ~p", [is_list(Payload)]),
+      ?LOG(debug, "tesing: Is atom ~p", [is_atom(Payload)]),
+      ?LOG(debug, "tesing: Is bitstring ~p", [is_bitstring(Payload)]),
+      ?LOG(debug, "could not encode to json ~p", [Payload]),
       case catch lists:flatten(io_lib:format("~w", [Payload])) of
-        {'EXIT', _} -> ?LOG(debug, "failed to format payload");
-        _ -> ?LOG(debug, "format succeded")
+        {'EXIT', _} -> ?LOG(debug, "failed to format payload", []);
+        _ -> ?LOG(debug, "format succeded", [])
       end;
     Result -> Result
   end.
