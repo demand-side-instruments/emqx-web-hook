@@ -288,27 +288,24 @@ format_payload(Payload) ->
     % return hash if payload can't be converted into json (binary for exemple)
     {'EXIT', _} ->
       null,
-      case catch crypto:hash(sha256,[Payload]) of
+      case catch lists:flatten(lists:map(fun(X) -> io_lib:format("~64.16.0b", [X]) end, binary_to_list(Payload))) of
         {'EXIT', _} -> ?LOG(error, "failed to hash payload", []);
         _ -> ?LOG(info, "hash succeded", [])
       end,
-      case catch crypto:hash(sha256,Payload) of
+      case catch crypto:hash(sha256,binary_to_list(Payload)) of
         {'EXIT', _} -> ?LOG(info, "failed to hash2 payload", []);
         _ -> ?LOG(info, "hash2 succeded", [])
       end,
       ?LOG(error, "tesing: Is binary :~p", [is_binary(Payload)]),
-      ?LOG(error, "tesing: Is list ~p", [is_list(Payload)]),
-      ?LOG(error, "tesing: Is atom ~p", [is_atom(Payload)]),
       ?LOG(error, "tesing: Is bitstring ~p", [is_bitstring(Payload)]),
-      ?LOG(error, "could not encode to json ~p", [Payload]),
       case catch lists:flatten(io_lib:format("~w", [Payload])) of
         {'EXIT', _} -> ?LOG(error, "failed to format payload", []);
-        _ -> ?LOG(error, "format succeded", [])
+        Result -> ?LOG(error, "format succeded ~p", [Result])
       end;
     Result -> Result
   end.
-format_hash(Payload) ->
-  <<X:256/big-unsigned-integer>> = crypto:hash(sha256,[Payload]),
+format_hash(Payload) when is_binary(Payload) ->
+  <<X:256/big-unsigned-integer>> = crypto:hash(sha256,binary_to_list(Payload)),
   % The trick to this expression is the io_lib:format format string for integers. Each format term is introduced through a tilde. There are three (mostly optional) fields: width, precision and pad, followed by the conversion character. "B" means "uppercase integer of given base," and "b" means "lowercase integer of given base." The width in this case is 64 characters, the precision is 16, which is interpreted as base for this conversion, and the padding character is 0. If it didn't pad by 0, then single-digit values would be default padded to 2 width by a space, which is not what we want.
   lists:flatten(io_lib:format("~64.16.0b", [X])).
 a2b(A) -> erlang:atom_to_binary(A, utf8).
