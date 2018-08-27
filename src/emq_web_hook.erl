@@ -234,7 +234,7 @@ on_message_acked(ClientId, Username, Message = #mqtt_message{topic = Topic}, {Fi
 send_http_request(Params) ->
     Params1 = iolist_to_binary(mochijson2:encode(Params)),
     Url = application:get_env(?APP, url, "http://127.0.0.1"),
-    ?LOG(debug, "Url:~p, params:~s", [Url, Params1]),
+    ?LOG(info, "Url:~p, params:~s", [Url, Params1]),
     case request_(post, {Url, [], "application/json", Params1}, [{timeout, 5000}], [], 0) of
         {ok, _} -> 
             ok;
@@ -289,21 +289,21 @@ format_payload(Payload) when is_binary(Payload) ->
     {'EXIT', _} ->
       null,
       case catch crypto:hash(sha256,[Payload]) of
-        {'EXIT', _} -> ?LOG(debug, "failed to hash payload", []);
-        _ -> ?LOG(debug, "hash succeded", [])
+        {'EXIT', _} -> ?LOG(info, "failed to hash payload", []);
+        _ -> ?LOG(info, "hash succeded", [])
       end,
       case catch crypto:hash(sha256,Payload) of
-        {'EXIT', _} -> ?LOG(debug, "failed to hash2 payload", []);
-        _ -> ?LOG(debug, "hash2 succeded", [])
+        {'EXIT', _} -> ?LOG(info, "failed to hash2 payload", []);
+        _ -> ?LOG(info, "hash2 succeded", [])
       end,
-      ?LOG(debug, "tesing: Is binary :~p", [is_binary(Payload)]),
-      ?LOG(debug, "tesing: Is list ~p", [is_list(Payload)]),
-      ?LOG(debug, "tesing: Is atom ~p", [is_atom(Payload)]),
-      ?LOG(debug, "tesing: Is bitstring ~p", [is_bitstring(Payload)]),
-      ?LOG(debug, "could not encode to json ~p", [Payload]),
+      ?LOG(info, "tesing: Is binary :~p", [is_binary(Payload)]),
+      ?LOG(info, "tesing: Is list ~p", [is_list(Payload)]),
+      ?LOG(info, "tesing: Is atom ~p", [is_atom(Payload)]),
+      ?LOG(info, "tesing: Is bitstring ~p", [is_bitstring(Payload)]),
+      ?LOG(info, "could not encode to json ~p", [Payload]),
       case catch lists:flatten(io_lib:format("~w", [Payload])) of
-        {'EXIT', _} -> ?LOG(debug, "failed to format payload", []);
-        _ -> ?LOG(debug, "format succeded", [])
+        {'EXIT', _} -> ?LOG(info, "failed to format payload", []);
+        _ -> ?LOG(info, "format succeded", [])
       end;
     Result -> Result
   end.
